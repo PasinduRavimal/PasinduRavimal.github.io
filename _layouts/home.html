@@ -1,0 +1,69 @@
+---
+layout: default
+---
+
+<div class="home">
+  {%- if page.title -%}
+    <h1 class="page-heading">{{ page.title }}</h1>
+  {%- endif -%}
+
+  {{ content }}
+
+  {%- if site.posts.size > 0 -%}
+    <h2 class="post-list-heading">{{ page.list_title | default: "Posts" }}</h2>
+	<div id="search-container">
+	  <input type="text" id="search-input" placeholder="Search {{ page.list_title | default: 'Posts' }}..." style="width: 100%; padding: 10px; margin-bottom: 20px;">
+	  <ul id="results-container"></ul>
+	</div>
+
+	<!-- Configuration for Simple-Jekyll-Search -->
+	<script src="https://unpkg.com/simple-jekyll-search@latest/dest/simple-jekyll-search.min.js"></script>
+
+	<script>
+	  // Dynamically choose the data file based on the page's category
+	  const currentCategory = "{{ page.category }}";
+	  let searchJsonUrl = '{{ site.baseurl }}/search.json'; // fallback default
+
+	  if (currentCategory === 'writeups') {
+		searchJsonUrl = '{{ site.baseurl }}/search-writeups.json';
+	  } else if (currentCategory === 'blog') {
+		searchJsonUrl = '{{ site.baseurl }}/search-blog.json';
+	  }
+
+	  window.simpleJekyllSearch = SimpleJekyllSearch({
+		searchInput: document.getElementById('search-input'),
+		resultsContainer: document.getElementById('results-container'),
+		json: searchJsonUrl,
+		searchResultTemplate: '<li><a href="{url}">{title}</a><span class="entry-date"> - {date}</span></li>',
+		noResultsText: 'No results found',
+		limit: 10,
+		fuzzy: false
+	  })
+	</script>
+    <ul class="post-list">
+	
+	  {% if page.category %}
+		{% assign filtered_posts = site.categories[page.category] %}
+	  {% else %}
+		{% assign filtered_posts = site.posts %}
+	  {% endif %}
+      {%- for post in filtered_posts -%}
+      <li>
+        {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
+        <span class="post-meta">{{ post.date | date: date_format }}</span>
+        <h3>
+          <a class="post-link" href="{{ post.url | relative_url }}">
+            {{ post.title | escape }}
+          </a>
+        </h3>
+        {%- if site.show_excerpts -%}
+          {{ post.excerpt }}
+        {%- endif -%}
+      </li>
+      {%- endfor -%}
+    </ul>
+
+    <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | relative_url }}">via RSS</a></p>
+  {%- endif -%}
+
+</div>
